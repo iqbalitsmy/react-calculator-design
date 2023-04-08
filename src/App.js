@@ -63,6 +63,7 @@ function reducer(state, { type, payload }) {
       return {};
     //Delete digit
     case ACTIONS.DELETE_DIGIT:
+      // if equation done than remove output
       if(state.overwrite) {
         return {
           ...state,
@@ -71,6 +72,7 @@ function reducer(state, { type, payload }) {
         }
       }
       if(state.currentOparand == null ) return state;
+      //empty state if alredy have one digit
       if(state.currentOparand.length === 1) {
         return{
           ...state,
@@ -79,6 +81,7 @@ function reducer(state, { type, payload }) {
       }
       return {
         ...state,
+        //remove last digit
         currentOparand: state.currentOparand.slice(0, -1)
       }
     
@@ -123,6 +126,16 @@ function evaluate ({ currentOparand, previousOparand, operation }) {
   return computation.toString();
 }
 
+//Formating the output
+const INTIGER_FORMATTER = new Intl.NumberFormat("en-us", {
+  maximumFractionDigits: 0,
+})
+function formatOperation(operand) {
+  if(operand == null) return
+  const [integer, decimal] = operand.split('.')
+  if(decimal == null) return INTIGER_FORMATTER.format(integer)
+  return `${INTIGER_FORMATTER.format(integer)}.${decimal}`
+}
 
 function App() {
   const [{ currentOparand, previousOparand, operation }, dispatch] = useReducer(reducer, {})
@@ -130,8 +143,8 @@ function App() {
   return (
     <div className="calculator-grid">
       <div className='output'>
-        <div className='previous-operand'>{previousOparand} {operation}</div>
-        <div className='current-operand'>{currentOparand}</div>
+        <div className='previous-operand'>{formatOperation(previousOparand)} {operation}</div>
+        <div className='current-operand'>{formatOperation(currentOparand)}</div>
       </div>
       <button className='span-two' onClick={() => dispatch({ type: ACTIONS.CLEAR })} >AC</button>
       <button onClick={() => dispatch({ type: ACTIONS.DELETE_DIGIT })}>DEL</button>
